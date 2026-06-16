@@ -3,7 +3,7 @@ name: Update formula
 on:
   repository_dispatch:
     types: [new-release]
-  workflow_dispatch: # manual run (re-index trigger)
+  workflow_dispatch:
   schedule:
     - cron: "0 6 * * *"
 
@@ -12,6 +12,7 @@ permissions:
 
 env:
   FORMULA_PATH: Formula/snow-cli.rb
+  TEMPLATE_PATH: Formula/snow-cli.rb.tpl
   MAIN_REPO: ewatch/snow-cli
 
 jobs:
@@ -56,30 +57,17 @@ jobs:
           targets[x86_64-apple-darwin]="x86_64-apple-darwin"
           targets[aarch64-unknown-linux-gnu]="aarch64-unknown-linux-gnu"
           targets[x86_64-unknown-linux-gnu]="x86_64-unknown-linux-gnu"
-          targets[x86_64-pc-windows-msvc]="x86_64-pc-windows-msvc"
 
           declare -A checksums
           for target_key in "${!targets[@]}"; do
             target="${targets[$target_key]}"
             base_url="https://github.com/${MAIN_REPO}/releases/download/${tag}"
-
-            if [[ "${target}" == "x86_64-pc-windows-msvc" ]]; then
-              archive="snow-cli-${version}-${target}.zip"
-            else
-              archive="snow-cli-${version}-${target}.tar.xz"
-            fi
-
+            archive="snow-cli-${version}-${target}.tar.xz"
             url="${base_url}/${archive}"
 
             echo "Downloading ${archive}..."
             curl -sSLO "${url}" || { echo "Failed to download ${archive}" >&2; exit 1; }
-
-            if [[ "${archive}" == *.zip ]]; then
-              checksums["${target}"]=$(sha256sum "${archive}" | cut -d' ' -f1)
-            else
-              checksums["${target}"]=$(sha256sum "${archive}" | cut -d' ' -f1)
-            fi
-
+            checksums["${target}"]=$(sha256sum "${archive}" | cut -d' ' -f1)
             rm -f "${archive}"
           done
 
@@ -87,73 +75,23 @@ jobs:
           intel_mac_checksum="${checksums[x86_64-apple-darwin]}"
           linux_arm_checksum="${checksums[aarch64-unknown-linux-gnu]}"
           linux_intel_checksum="${checksums[x86_64-unknown-linux-gnu]}"
-          win_checksum="${checksums[x86_64-pc-windows-msvc]}"
 
-          cat > "${FORMULA_PATH}" << 'FORMULA'
-class SnowCli < Formula
-  desc "CLI gateway for LLMs and coding agents to access ServiceNow instances"
-  homepage "https://github.com/ewatch/snow-cli"
-  license "MIT"
-  version "VERSION_PLACEHOLDER"
+          # Regenerate the formula from the committed template so every run
+          # starts from clean placeholders.
+          cp "${TEMPLATE_PATH}" "${FORMULA_PATH}"
+          sed -i \
+            -e "s|VERSION_PLACEHOLDER|${version}|g" \
+            -e "s|ARM_MAC_PLACEHOLDER|${at_checksum}|g" \
+            -e "s|INTEL_MAC_PLACEHOLDER|${intel_mac_checksum}|g" \
+            -e "s|LINUX_ARM_PLACEHOLDER|${linux_arm_checksum}|g" \
+            -e "s|LINUX_INTEL_PLACEHOLDER|${linux_intel_checksum}|g" \
+            "${FORMULA_PATH}"
 
-  on_macos do
-    if Hardware::CPU.arm?
-      url "https://github.com/ewatch/snow-cli/releases/download/vVERSION_PLACEHOLDER/snow-cli-VERSION_PLACEHOLDER-aarch64-apple-darwin.tar.xz"
-      sha256 "ARM_MAC_PLACEHOLDER"
-    end
-    if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/vVERSION_PLACEHOLDER/snow-cli-VERSION_PLACEHOLDER-x86_64-apple-darwin.tar.xz"
-      sha256 "INTEL_MAC_PLACEHOLDER"
-    end
-  end
-
-  on_linux do
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ewatch/snow-cli/releases/download/vVERSION_PLACEHOLDER/snow-cli-VERSION_PLACEHOLDER-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "LINUX_ARM_PLACEHOLDER"
-    end
-    if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/vVERSION_PLACEHOLDER/snow-cli-VERSION_PLACEHOLDER-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "LINUX_INTEL_PLACEHOLDER"
-    end
-  end
-
-  def install
-    bin.install "snow-cli"
-    bin.install "snow-cli-ro"
-  end
-
-  test do
-    assert_match version.to_s, shell_output("#{bin}/snow-cli --version")
-  end
-end
-FORMULA
-
-          # Use Python for cross-platform sed
-          python3 -c "
-import sys
-path = '${FORMULA_PATH}'
-version = '${version}'
-
-with open(path) as f:
-    content = f.read()
-
-content = content.replace('VERSION_PLACEHOLDER', version)
-content = content.replace('ARM_MAC_PLACEHOLDER', '${at_checksum}')
-content = content.replace('INTEL_MAC_PLACEHOLDER', '${intel_mac_checksum}')
-content = content.replace('LINUX_ARM_PLACEHOLDER', '${linux_arm_checksum}')
-content = content.replace('LINUX_INTEL_PLACEHOLDER', '${linux_intel_checksum}')
-
-with open(path, 'w') as f:
-    f.write(content)
-
-print(f'Updated formula to version {version}')
-print(f'  aarch64-apple-darwin:  {at_checksum}')
-print(f'  x86_64-apple-darwin:   {intel_mac_checksum}')
-print(f'  aarch64-linux-gnu:     {linux_arm_checksum}')
-print(f'  x86_64-linux-gnu:      {linux_intel_checksum}')
-print(f'  x86_64-windows-msvc:   {win_checksum}')
-"
+          echo "Updated formula to ${version}"
+          echo "  aarch64-apple-darwin: ${at_checksum}"
+          echo "  x86_64-apple-darwin:  ${intel_mac_checksum}"
+          echo "  aarch64-linux-gnu:    ${linux_arm_checksum}"
+          echo "  x86_64-linux-gnu:     ${linux_intel_checksum}"
 
       - name: Commit and push
         shell: bash
