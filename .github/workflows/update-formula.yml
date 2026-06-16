@@ -52,21 +52,26 @@ jobs:
           version="${{ steps.release.outputs.version }}"
           tag="${{ steps.release.outputs.tag }}"
 
-          declare -A targets
-          targets[aarch64-apple-darwin]="aarch64-apple-darwin"
-          targets[x86_64-apple-darwin]="x86_64-apple-darwin"
-          targets[aarch64-unknown-linux-gnu]="aarch64-unknown-linux-gnu"
-          targets[x86_64-unknown-linux-gnu]="x86_64-unknown-linux-gnu"
+          targets=(
+            "aarch64-apple-darwin"
+            "x86_64-apple-darwin"
+            "aarch64-unknown-linux-gnu"
+            "x86_64-unknown-linux-gnu"
+          )
 
           declare -A checksums
-          for target_key in "${!targets[@]}"; do
-            target="${targets[$target_key]}"
-            base_url="https://github.com/${MAIN_REPO}/releases/download/${tag}"
+          for target in "${targets[@]}"; do
             archive="snow-cli-${version}-${target}.tar.xz"
-            url="${base_url}/${archive}"
+            url="https://github.com/${MAIN_REPO}/releases/download/${tag}/${archive}"
 
             echo "Downloading ${archive}..."
-            curl -sSLO "${url}" || { echo "Failed to download ${archive}" >&2; exit 1; }
+            # --fail makes a missing asset (HTTP 4xx/5xx) a hard error instead of
+            # silently saving the "Not Found" page and hashing it.
+            if ! curl -fsSL -o "${archive}" "${url}"; then
+              echo "ERROR: release asset not found: ${url}" >&2
+              echo "The release must publish versioned archives named snow-cli-<version>-<target>.tar.xz for all four unix targets." >&2
+              exit 1
+            fi
             checksums["${target}"]=$(sha256sum "${archive}" | cut -d' ' -f1)
             rm -f "${archive}"
           done
@@ -75,6 +80,22 @@ jobs:
           intel_mac_checksum="${checksums[x86_64-apple-darwin]}"
           linux_arm_checksum="${checksums[aarch64-unknown-linux-gnu]}"
           linux_intel_checksum="${checksums[x86_64-unknown-linux-gnu]}"
+
+          # Guard: every checksum must be present and the four must be distinct.
+          # Identical hashes are the classic symptom of all downloads returning
+          # the same error page, so refuse to publish a broken formula.
+          for name in at_checksum intel_mac_checksum linux_arm_checksum linux_intel_checksum; do
+            if [[ -z "${!name}" ]]; then
+              echo "ERROR: empty checksum for ${name}" >&2
+              exit 1
+            fi
+          done
+          uniq_count=$(printf '%s\n' "${at_checksum}" "${intel_mac_checksum}" "${linux_arm_checksum}" "${linux_intel_checksum}" | sort -u | wc -l)
+          if [[ "${uniq_count}" -lt 4 ]]; then
+            echo "ERROR: per-target checksums are not all distinct; downloads likely returned error pages." >&2
+            printf '  %s\n' "${at_checksum}" "${intel_mac_checksum}" "${linux_arm_checksum}" "${linux_intel_checksum}" >&2
+            exit 1
+          fi
 
           # Regenerate the formula from the committed template so every run
           # starts from clean placeholders.
@@ -88,10 +109,6 @@ jobs:
             "${FORMULA_PATH}"
 
           echo "Updated formula to ${version}"
-          echo "  aarch64-apple-darwin: ${at_checksum}"
-          echo "  x86_64-apple-darwin:  ${intel_mac_checksum}"
-          echo "  aarch64-linux-gnu:    ${linux_arm_checksum}"
-          echo "  x86_64-linux-gnu:     ${linux_intel_checksum}"
 
       - name: Commit and push
         shell: bash
