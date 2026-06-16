@@ -3,7 +3,7 @@ name: Update formula
 on:
   repository_dispatch:
     types: [new-release]
-  workflow_dispatch:
+  workflow_dispatch: # manual run (re-index trigger)
   schedule:
     - cron: "0 6 * * *"
 
