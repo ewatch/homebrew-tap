@@ -19,7 +19,7 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Fetch latest release
         id: release
@@ -44,6 +44,21 @@ jobs:
         run: |
           current=$(grep -oP '(?<=version ")[^"]+' "${FORMULA_PATH}" 2>/dev/null || echo "none")
           echo "version=${current}" >> "${GITHUB_OUTPUT}"
+
+      - name: Archive current formula as versioned formula
+        if: |
+          steps.current.outputs.version != 'none' &&
+          steps.release.outputs.version != steps.current.outputs.version
+        shell: bash
+        run: |
+          current_version="${{ steps.current.outputs.version }}"
+          major_minor="${current_version%.*}"
+          versioned_path="Formula/snow-cli@${major_minor}.rb"
+          digits="${major_minor//./}"
+          versioned_class="SnowCliAT${digits}"
+          sed "s/^class SnowCli < Formula$/class ${versioned_class} < Formula/" \
+            "${FORMULA_PATH}" > "${versioned_path}"
+          echo "Archived ${FORMULA_PATH} -> ${versioned_path} (class ${versioned_class})"
 
       - name: Update if newer
         if: steps.release.outputs.version != steps.current.outputs.version || github.event_name != 'schedule'
@@ -116,7 +131,7 @@ jobs:
           git config user.name "snow-cli bot"
           git config user.email "bot@ewatch.github"
 
-          git add "${FORMULA_PATH}"
+          git add Formula/
           if git diff --cached --quiet; then
             echo "No changes to commit"
             exit 0
