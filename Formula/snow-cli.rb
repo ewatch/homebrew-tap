@@ -2,27 +2,27 @@ class SnowCli < Formula
   desc "CLI gateway for LLMs and coding agents to access ServiceNow instances"
   homepage "https://github.com/ewatch/snow-cli"
   license "MIT"
-  version "0.7.0"
+  version "0.8.0"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.7.0/snow-cli-0.7.0-aarch64-apple-darwin.tar.xz"
-      sha256 "394a45e759d55a0dd24c80b5f4bd16ef2994982e6f5fdc805b37b85c7ea9ef13"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.8.0/snow-cli-0.8.0-aarch64-apple-darwin.tar.xz"
+      sha256 "1abd7480b1e15a40beace664a50f08bd8ecfe024666e9606fe9f6a69d5bb3985"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.7.0/snow-cli-0.7.0-x86_64-apple-darwin.tar.xz"
-      sha256 "29a6d2520b6c282df9d574d206df947ff88348bc56003f08482af92fb5a3684f"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.8.0/snow-cli-0.8.0-x86_64-apple-darwin.tar.xz"
+      sha256 "654afa87b19336b9660c56fcce40416e8e0a331bb8cd64db1a7c1f34a467dd19"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.7.0/snow-cli-0.7.0-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "fd6f9a08e21d89dbc18297e465ffbe9d46b3cac6e53d988b1f452c3af6e6ced4"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.8.0/snow-cli-0.8.0-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "d9bf3f67b822924aa6b61900bc14b9a59f693f008aa663ebdb1141f08b5b0220"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.7.0/snow-cli-0.7.0-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "ba738b43e30a8102d55ec40a38484f7a0df6533de201f85bf8068e1ce505d1ef"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.8.0/snow-cli-0.8.0-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "748ad40d45d237e21c65ff2ea4aba0df2e0ad5c9f2e2e083e314d85888b7c717"
     end
   end
 
