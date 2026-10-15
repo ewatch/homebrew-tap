@@ -2,27 +2,27 @@ class SnowCli < Formula
   desc "CLI gateway for LLMs and coding agents to access ServiceNow instances"
   homepage "https://github.com/ewatch/snow-cli"
   license "MIT"
-  version "0.9.0"
+  version "0.10.0"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.9.0/snow-cli-0.9.0-aarch64-apple-darwin.tar.xz"
-      sha256 "0460fec3ccc8fd85fe7c814d9b1142e41aa29a0f16928b12c2fc480b3da4bde3"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-aarch64-apple-darwin.tar.xz"
+      sha256 "9380fdc17df2ac9bab47196162a4a06154715b3c92242e4d0c0757defb36f95a"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.9.0/snow-cli-0.9.0-x86_64-apple-darwin.tar.xz"
-      sha256 "824d8aba79a2918e4e475cc22b8277bfea68fe08dad0c1b1f576a1997b2b780e"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-x86_64-apple-darwin.tar.xz"
+      sha256 "142bb1f25b4cb44f4f4e73bc6a9f3793229d27688b45714fa01ffac8dbe8897a"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.9.0/snow-cli-0.9.0-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "8f765ee64aed6aa8a94a60e9550f0778700a66b3e47413d450cad30ad748fda9"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "93453869b64537e59c1a31571171860e59ed19f01a217bc41cae6567df86ec0d"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.9.0/snow-cli-0.9.0-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "63062ef4966577df88fbfe3cdd0135089dfba6b53073b3d3bf8f98f1e7f92472"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "0bc6f47ae2be5a5cb59f34e23521909f09e2e18ef683e7500f54dd4b61effd3f"
     end
   end
 
