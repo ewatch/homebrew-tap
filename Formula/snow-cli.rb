@@ -2,27 +2,27 @@ class SnowCli < Formula
   desc "CLI gateway for LLMs and coding agents to access ServiceNow instances"
   homepage "https://github.com/ewatch/snow-cli"
   license "MIT"
-  version "0.10.0"
+  version "0.11.0"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-aarch64-apple-darwin.tar.xz"
-      sha256 "9380fdc17df2ac9bab47196162a4a06154715b3c92242e4d0c0757defb36f95a"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.11.0/snow-cli-0.11.0-aarch64-apple-darwin.tar.xz"
+      sha256 "a358257b27d80aaa52e5c410918b0aa53e4539809b0ed2e41401a21565dab000"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-x86_64-apple-darwin.tar.xz"
-      sha256 "142bb1f25b4cb44f4f4e73bc6a9f3793229d27688b45714fa01ffac8dbe8897a"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.11.0/snow-cli-0.11.0-x86_64-apple-darwin.tar.xz"
+      sha256 "b056a3bc5ee32e5c2fd38057870f4929a0e5b179092852cfdca74b10ed29c006"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-aarch64-unknown-linux-gnu.tar.xz"
-      sha256 "93453869b64537e59c1a31571171860e59ed19f01a217bc41cae6567df86ec0d"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.11.0/snow-cli-0.11.0-aarch64-unknown-linux-gnu.tar.xz"
+      sha256 "c776a83e7b152833f6e3e9260d9207876894e7f9d4c05e5575519d84419d2609"
     end
     if Hardware::CPU.intel?
-      url "https://github.com/ewatch/snow-cli/releases/download/v0.10.0/snow-cli-0.10.0-x86_64-unknown-linux-gnu.tar.xz"
-      sha256 "0bc6f47ae2be5a5cb59f34e23521909f09e2e18ef683e7500f54dd4b61effd3f"
+      url "https://github.com/ewatch/snow-cli/releases/download/v0.11.0/snow-cli-0.11.0-x86_64-unknown-linux-gnu.tar.xz"
+      sha256 "dbaf3a9b4076d14d153a496bb7b5ea2b0ecd6558ec47298f12698169e5b2cbac"
     end
   end
 
